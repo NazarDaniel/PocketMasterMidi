@@ -1,5 +1,6 @@
 <template>
-  <q-card>Devices connected = {{ WebMidi.outputs.length }}</q-card>
+  <!-- outputs -->
+  <q-card>Output devices connected = {{ WebMidi.outputs.length }}</q-card>
   <q-card v-if="selectedOutput === null">No selected device</q-card>
   <q-card v-if="selectedOutput !== null"> Selected device: {{ selectedOutput.name }} </q-card>
   <q-card v-if="!WebMidi.outputs"> No available devices </q-card>
@@ -18,18 +19,37 @@
     <h6>Test commands</h6>
     <q-btn @click="selectedOutput.channels[1]?.sendControlChange(25, 127)">Program up</q-btn>
   </q-card>
+
+  <!-- inputs -->
+  <q-card>Input devices connected = {{ WebMidi.inputs.length }}</q-card>
+  <q-card v-if="selectedInput === null">No selected device</q-card>
+  <q-card v-if="selectedInput !== null"> Selected device: {{ selectedInput.name }} </q-card>
+  <q-card v-if="!WebMidi.inputs"> No available devices </q-card>
+  <q-card v-if="WebMidi.inputs.length > 0">
+    <div>
+      <q-btn
+        v-for="(input, inputKey) in WebMidi.inputs"
+        :key="inputKey"
+        @click="selectInput(input)"
+      >
+        {{ input.name }}
+      </q-btn>
+    </div>
+  </q-card>
+  <q-card v-if="selectedInput !== null">
+    <h6>Input monitor</h6>
+  </q-card>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import type { Output } from 'webmidi';
+import type { Input, Output } from 'webmidi';
 import { WebMidi } from 'webmidi';
 
 onMounted(() => {
   WebMidi.enable()
     .then(() => {
       console.log('WebMidi enabled!');
-      console.log(WebMidi.outputs);
     })
     .catch((err) => {
       console.error('WebMidi could not be enabled:', err);
@@ -41,10 +61,8 @@ const selectOutput = (output: Output | null) => {
   selectedOutput.value = output;
 };
 
-const clearAll = () => {
-  if (!selectedOutput.value) {
-    return;
-  }
-  const channel = selectedOutput.value.channel['1'];
+const selectedInput = ref<Input | null>(null);
+const selectInput = (input: Input | null) => {
+  selectedInput.value = input;
 };
 </script>
