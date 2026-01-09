@@ -66,7 +66,8 @@ export default defineConfigWithVueTs(
       'prefer-promise-reject-errors': 'off',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
-
+      'no-for-in-array': 'off',
+      '@typescript-eslint/no-for-in-array': 'off',
       // allow debugger during development only
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     },
