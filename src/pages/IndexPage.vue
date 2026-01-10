@@ -16,7 +16,10 @@
           </q-card-section>
         </div>
         <!-- actions -->
-        <div class="col-8">a</div>
+        <div class="col-8">
+          <q-btn @click="test()">Test</q-btn>
+          <q-btn @click="loadPedalsPreset(2)">Load Pedals Preset 2</q-btn>
+        </div>
       </div>
     </q-card-section>
     <!-- inputs -->
@@ -34,16 +37,12 @@
         </div>
         <div class="col-8">
           <h5>Logs:</h5>
+
           <div v-for="(midiEvent, key) in logs" :key="key">
-            {{ midiEvent.dataBytes }}<br />{{ decodeArray(Array.from(midiEvent.dataBytes)) }}
+            {{ midiEvent.message.rawDataBytes.BYTES_PER_ELEMENT }}<br />{{
+              Array.from(midiEvent.message.rawDataBytes)
+            }}
           </div>
-          <q-btn
-            v-for="(midiEvent, key) in logs"
-            :key="key"
-            @click="replayEvent(midiEvent as MessageEvent)"
-          >
-            Replay event {{ key }} </q-btn
-          ><br />
         </div>
       </div>
     </q-card-section>
@@ -51,9 +50,44 @@
 </template>
 
 <script setup lang="ts">
+import { DeviceLoader } from 'src/components/devices/loader';
 import { onMounted, ref } from 'vue';
-import type { Event, Input, Message, MessageEvent, Output } from 'webmidi';
+import type { Input, MessageEvent, Output } from 'webmidi';
 import { WebMidi } from 'webmidi';
+
+const device = DeviceLoader.getInstance('SonicakePocketMaster');
+device?.loadDefaults();
+
+const loadPreampPreset = (presetName: string | number) => {
+  device?.loadPreampPreset(presetName);
+};
+
+const loadPedalsPreset = (presetId: string | number) => {
+  device?.loadPedalsPreset(presetId);
+};
+
+const test = () => {
+  // recebe [ 2, 0,  1, 0, 0, 0, 10, 1,  2, 4, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+  // manda    10, 0, 1, 0, 0, 0,  10, 1, 1, 4, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  // let str = '8080f0050a00010000000e0101040700020000000000000002000000000000020b000000000003f7';
+  // let str = '8080f0000e000100000006010104030007000000000000f7';
+  // let str = '8080f0000a00010000000a0101040900000000000000000000000000000000f7'; // nr off
+  let str = '8080f0010c00010000000a0101040900000000000000000001000000000000f7'; //nr on
+  console.log(str);
+  str = str.substring(8);
+  str = str.substring(0, str.length - 2);
+  console.log(str);
+
+  const hexBytes = str.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16));
+  if (!hexBytes) {
+    return;
+  }
+  const command = new Uint8Array(hexBytes);
+  console.log(command);
+  const test = [10, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9];
+
+  midiOutput?.value?.sendSysex([0], test);
+};
 
 const Midi = ref(WebMidi);
 
@@ -65,14 +99,6 @@ onMounted(() => {
 
 const midiInput = ref<null | Input>(null);
 const midiOutput = ref<null | Output>(null);
-
-const replayEvent = (midiEvent: MessageEvent) => {
-  console.log('Replaying event', midiEvent);
-  if (midiOutput.value === null) {
-    return;
-  }
-  midiOutput.value.sendSysex([10], midiEvent.dataBytes);
-};
 
 const selectInput = (input: Input) => {
   if (midiInput.value !== null) {
@@ -92,49 +118,4 @@ const selectInput = (input: Input) => {
 };
 
 const logs = ref<MessageEvent[]>([]);
-
-function encodeNumber(N: number) {
-  if (N < 0 || N > 100) {
-    throw new RangeError('N must be between 0 and 100');
-  }
-
-  // --- fixed metadata (indices 0–30) ---
-  const arr = new Array(35).fill(0);
-
-  arr[2] = 1;
-  arr[6] = 14;
-  arr[7] = 1;
-  arr[8] = 2;
-  arr[9] = 4;
-  arr[10] = 8;
-  arr[12] = 2;
-
-  // --- mixed-radix encoding ---
-  const D0 = N % 16; // base 16
-  const t1 = Math.floor(N / 16);
-
-  const D1 = (t1 % 8) * 2; // base 8, step 2
-  const D3 = Math.floor(t1 / 8); // base 3
-
-  const D2 = 4; // derived / constant flag
-
-  arr[31] = D0;
-  arr[32] = D1;
-  arr[33] = D2;
-  arr[34] = D3;
-
-  return arr;
-}
-
-function decodeArray(arr: number[]) {
-  if (!Array.isArray(arr) || arr.length !== 35 || !arr[31] || !arr[32] || !arr[34]) {
-    return -1;
-  }
-
-  const block = arr[34]; // 0..2
-  const offset = arr[32]; // 0..14 (step 2)
-
-  // index31 is derived / non-positional
-  return block * 32 + offset + (arr[31] % 16);
-}
 </script>
