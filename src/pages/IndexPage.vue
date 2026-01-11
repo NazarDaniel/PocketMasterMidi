@@ -10,9 +10,7 @@
         <!-- output list -->
         <div class="col-4">
           <q-card-section v-for="(output, key) in Midi.outputs" :key="key">
-            <q-btn @click="midiOutput = output" :disabled="midiOutput === output">{{
-              output.name
-            }}</q-btn>
+            <q-btn @click="selectOutput(output as Output)">{{ output.name }}</q-btn>
           </q-card-section>
         </div>
         <!-- actions -->
@@ -30,9 +28,7 @@
       <div class="row">
         <div class="col-4">
           <q-card-section v-for="(input, key) in Midi.inputs" :key="key">
-            <q-btn @click="selectInput(input as Input)" :disabled="midiInput === input">{{
-              input.name
-            }}</q-btn>
+            <q-btn @click="selectInput(input as Input)">{{ input.name }}</q-btn>
           </q-card-section>
         </div>
         <div class="col-8">
@@ -86,7 +82,7 @@ const test = () => {
   console.log(command);
   const test = [10, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9];
 
-  midiOutput?.value?.sendSysex([0], test);
+  // midiOutput?.value?.sendSysex([0], test);
 };
 
 const Midi = ref(WebMidi);
@@ -97,24 +93,12 @@ onMounted(() => {
   });
 });
 
-const midiInput = ref<null | Input>(null);
-const midiOutput = ref<null | Output>(null);
-
 const selectInput = (input: Input) => {
-  if (midiInput.value !== null) {
-    midiInput.value.removeListener();
-  }
-  if (input === null) {
-    return;
-  }
-  midiInput.value = input;
-  if (midiInput.value === null) {
-    return;
-  }
-  midiInput.value.addListener('sysex', (e: MessageEvent) => {
-    console.log('Sysex received', e);
-    logs.value.push(e);
-  });
+  device?.setMidiInput(input);
+};
+
+const selectOutput = (output: Output) => {
+  device?.setMidiOutput(output);
 };
 
 const logs = ref<MessageEvent[]>([]);

@@ -1,8 +1,11 @@
+import type { bytesDefinition } from './models/bytes-definition';
+
 export class nr {
-  states = [
+  states: moduleStateDefinitions[] = [
     {
       state: 'on',
       sysex_identifier: 1,
+      bytes: {},
     },
     {
       state: 'off',
@@ -18,4 +21,10 @@ export class nr {
       },
     },
   ];
+}
+
+interface moduleStateDefinitions {
+  state: string;
+  sysex_identifier: number;
+  bytes: bytesDefinition;
 }

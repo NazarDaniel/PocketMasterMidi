@@ -1,4 +1,4 @@
-import type { PedalsPreset } from './sonicake-pocket-master/models/pedals-preset';
+import type { Input, MessageEvent, Output } from 'webmidi';
 
 export interface DeviceInterface {
   name: string;
@@ -10,12 +10,43 @@ export interface DeviceInterface {
 
 export abstract class Device {
   public name: string;
-  public preampPresets: object[];
-  public pedalsPresets: PedalsPreset[];
+  public midiInput?: Input;
+  public midiOutput?: Output;
 
   constructor(name: string) {
     this.name = name;
-    this.preampPresets = [];
-    this.pedalsPresets = [];
+  }
+
+  sendSysex(byteArray: number[]) {
+    if (!this.midiOutput) {
+      return;
+    }
+    this.midiOutput.sendSysex([0], byteArray);
+  }
+
+  setMidiInput(input: Input) {
+    if (this.midiInput) {
+      this.midiInput.removeListener();
+    }
+    if (input === null) {
+      return;
+    }
+    this.midiInput = input;
+    if (!this.midiInput) {
+      return;
+    }
+    this.midiInput.addListener('sysex', (e: MessageEvent) => {
+      console.log('Sysex received', e);
+    });
+  }
+
+  setMidiOutput(output: Output) {
+    if (!output) {
+      return;
+    }
+    this.midiOutput = output;
+    if (!this.midiOutput) {
+      return;
+    }
   }
 }
