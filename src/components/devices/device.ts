@@ -17,11 +17,14 @@ export abstract class Device {
     this.name = name;
   }
 
-  sendSysex(byteArray: number[]) {
+  sendSysex(byteArray: number[], identifier?: number) {
     if (!this.midiOutput) {
       return;
     }
-    this.midiOutput.sendSysex([0], byteArray);
+    if (!identifier) {
+      identifier = 0;
+    }
+    this.midiOutput.sendSysex(identifier, byteArray);
   }
 
   setMidiInput(input: Input) {

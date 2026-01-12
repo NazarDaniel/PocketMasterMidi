@@ -4,6 +4,7 @@ import preampPresets from './default-preamp-presets';
 import pedalsPresets from './default-pedals-presets';
 import type { bytesDefinition } from './models/bytes-definition';
 import type { PedalsPreset } from './models/pedals-preset';
+import type { moduleStateDefinition } from './models/module-state-definition';
 
 export class SonicakePocketMasterDevice extends Device implements DeviceInterface {
   public preampPresets: object[];
@@ -39,7 +40,8 @@ export class SonicakePocketMasterDevice extends Device implements DeviceInterfac
         return;
       }
       if (moduleData.state) {
-        const moduleStateDefinitions = this.modules[moduleName as keyof typeof this.modules];
+        const moduleStateDefinitions =
+          this.modules[moduleName as keyof SonicakePocketMasterDeviceModules];
         if (!moduleStateDefinitions) {
           return;
         }
@@ -52,11 +54,20 @@ export class SonicakePocketMasterDevice extends Device implements DeviceInterfac
           return;
         }
 
-        const bytes = moduleStateDefinition.bytes;
-        const byteArray = SonicakePocketMasterDevice.buildByteArray(bytes);
-        this.sendSysex(byteArray);
+        this.sendStateSysex(moduleStateDefinition);
       }
     });
+  }
+
+  sendStateSysex(moduleStateDefinition: moduleStateDefinition) {
+    const bytes = moduleStateDefinition.bytes;
+    const byteArray = SonicakePocketMasterDevice.buildByteArray(bytes);
+
+    let sysexIdentifier = 0;
+    if ('sysex_identifier' in moduleStateDefinition) {
+      sysexIdentifier = moduleStateDefinition.sysex_identifier;
+    }
+    this.sendSysex(byteArray, sysexIdentifier);
   }
 
   static buildByteArray(bytesValues: bytesDefinition) {
@@ -70,7 +81,6 @@ export class SonicakePocketMasterDevice extends Device implements DeviceInterfac
       }
       result.push(value);
     }
-    console.log(result);
     return result;
   }
 }

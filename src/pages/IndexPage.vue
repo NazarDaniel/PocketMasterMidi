@@ -78,11 +78,17 @@ const test = () => {
   if (!hexBytes) {
     return;
   }
-  const command = new Uint8Array(hexBytes);
-  console.log(command);
+  // const command = new Uint8Array(hexBytes);
+  // console.log(command);
+  // const test = [10, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9];
   const test = [10, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9];
 
   // midiOutput?.value?.sendSysex([0], test);
+
+  console.log(hexBytes);
+  device?.sendSysex(hexBytes, 1);
+  // console.log(test);
+  // device?.sendSysex(test, 0);
 };
 
 const Midi = ref(WebMidi);
