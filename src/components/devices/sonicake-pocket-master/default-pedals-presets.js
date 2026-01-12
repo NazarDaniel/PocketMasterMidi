@@ -3,7 +3,9 @@ export default [
     id: 1,
     nr: {
       state: 'on',
-      threshold: 10,
+      params: {
+        1: 10, // threshold
+      },
     },
     fx1: {
       state: 'off',

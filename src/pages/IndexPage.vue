@@ -16,6 +16,7 @@
         <!-- actions -->
         <div class="col-8">
           <q-btn @click="test()">Test</q-btn>
+          <q-btn @click="loadPedalsPreset(1)">Load Pedals Preset 1</q-btn>
           <q-btn @click="loadPedalsPreset(2)">Load Pedals Preset 2</q-btn>
         </div>
       </div>
@@ -68,25 +69,22 @@ const test = () => {
   // let str = '8080f0050a00010000000e0101040700020000000000000002000000000000020b000000000003f7';
   // let str = '8080f0000e000100000006010104030007000000000000f7';
   // let str = '8080f0000a00010000000a0101040900000000000000000000000000000000f7'; // nr off
-  let str = '8080f0010c00010000000a0101040900000000000000000001000000000000f7'; //nr on
+  // let str = '8080f0010c00010000000a0101040900000000000000000001000000000000f7'; //nr on
+  // let str = '8080F00D0200010000000E01010408000000000000000000000000000000000000000000000000F7'; // nr = 0
+  let str = '8080F0000C00010000000E01010408000000000000000000000000000000000000000008080401F7'; // nr = 17
+  const identifier = parseInt(str.substring(6, 8), 16);
   console.log(str);
   str = str.substring(8);
   str = str.substring(0, str.length - 2);
-  console.log(str);
 
   const hexBytes = str.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16));
   if (!hexBytes) {
     return;
   }
-  // const command = new Uint8Array(hexBytes);
-  // console.log(command);
-  // const test = [10, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9];
-  const test = [10, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9];
-
-  // midiOutput?.value?.sendSysex([0], test);
 
   console.log(hexBytes);
-  device?.sendSysex(hexBytes, 1);
+  device?.sendSysex(hexBytes, identifier);
+  // const test = [10, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9];
   // console.log(test);
   // device?.sendSysex(test, 0);
 };

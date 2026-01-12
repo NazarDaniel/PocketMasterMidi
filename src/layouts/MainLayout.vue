@@ -13,6 +13,9 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header> Essential Links </q-item-label>
+        <q-item clickable v-ripple to="/SysexTester">
+          <q-item-section>Sysex Tester</q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
