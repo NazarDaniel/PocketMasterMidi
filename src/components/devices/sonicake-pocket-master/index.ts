@@ -44,7 +44,25 @@ export class SonicakePocketMasterDevice extends Device implements DeviceInterfac
       if (stateSysex && 'byteArray' in stateSysex && 'sysexIdentifier' in stateSysex) {
         this.sendSysex(stateSysex.byteArray, stateSysex.sysexIdentifier);
       }
+
+      // process module parameters
+      const getParameterSysexes = this.getParameterSysexes(preset, moduleName);
     });
+  }
+
+  getParameterSysexes(preset: PedalsPreset, moduleName: string) {
+    const moduleData = preset[moduleName as keyof SonicakePocketMasterDeviceModules];
+    if (!moduleData || !moduleData.params) {
+      return;
+    }
+    const results: { identifier: number; bytes: bytesDefinition }[] = [];
+    const params = moduleData.params;
+    const paramKeys = Object.keys(params);
+    paramKeys.forEach((paramKey: number) => {
+      const value = params[paramKey];
+    });
+
+    return results;
   }
 
   getStateSysex(preset: PedalsPreset, moduleName: string) {

@@ -11,7 +11,7 @@
     <h6>Result</h6>
     {
     <div style="font-family: monospace; font-size: 12px" v-for="(bs, key) in nrTable" :key="key">
-      {{ key }} : {{ toArray(bs) }},
+      {{ key }} : {{ toSimplifiedObject(bs) }},
     </div>
     }
   </div>
@@ -27,16 +27,36 @@ const toArray = (bs: string) => {
 
 const toSimplifiedObject = (bs: string) => {
   const byteArray = toArray(bs);
-  const variablePositions = [0, 2];
-  const fixed = {
-    2: 1,
-    6: 14,
-    7: 1,
-    8: 1,
-    9: 4,
-    10: 8,
+  const positions: { [key: number]: number | null } = {
+    0: null,
+    // 2: 1,
+    // 6: 14,
+    // 7: 1,
+    // 8: 1,
+    // 9: 4,
+    // 10: 8,
+    31: null,
+    32: null,
+    33: null,
+    34: null,
   };
-  const result = {};
+  const result: { [key: number]: number } = {};
+  for (const [key, value] of Object.entries(positions)) {
+    let endValue: number;
+    if (value === null) {
+      if (!byteArray.byteArray || !(key in byteArray.byteArray)) {
+        continue;
+      }
+      endValue = byteArray.byteArray[key as keyof typeof byteArray.byteArray] as number;
+    } else {
+      endValue = value;
+    }
+    result[parseInt(key)] = endValue;
+  }
+  return {
+    identifier: byteArray.identifier,
+    byteArray: result,
+  };
 };
 
 const nrTable = Object.values({

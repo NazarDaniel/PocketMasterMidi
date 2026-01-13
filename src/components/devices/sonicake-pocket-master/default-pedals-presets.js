@@ -4,7 +4,7 @@ export default [
     nr: {
       state: 'on',
       params: {
-        1: 10, // threshold
+        0: 10, // threshold
       },
     },
     fx1: {
@@ -37,6 +37,9 @@ export default [
     id: 2,
     nr: {
       state: 'off',
+      params: {
+        0: 20, // threshold
+      },
     },
     fx1: {
       state: 'off',
