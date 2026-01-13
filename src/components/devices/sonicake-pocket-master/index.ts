@@ -46,20 +46,41 @@ export class SonicakePocketMasterDevice extends Device implements DeviceInterfac
       }
 
       // process module parameters
-      const getParameterSysexes = this.getParameterSysexes(preset, moduleName);
+      const parameterSysexes = this.getParameterSysexes(preset, moduleName);
+      parameterSysexes?.forEach((sysexMessage) => {
+        this.sendSysex(sysexMessage.byteArray, sysexMessage.sysexIdentifier);
+      });
     });
   }
 
   getParameterSysexes(preset: PedalsPreset, moduleName: string) {
+    const module = this.modules[moduleName as keyof typeof this.modules];
     const moduleData = preset[moduleName as keyof SonicakePocketMasterDeviceModules];
-    if (!moduleData || !moduleData.params) {
-      return;
+    if (!module || !moduleData || !moduleData.params) {
+      return [];
     }
-    const results: { identifier: number; bytes: bytesDefinition }[] = [];
-    const params = moduleData.params;
-    const paramKeys = Object.keys(params);
+    const results: { sysexIdentifier: number; byteArray: number[] }[] = [];
+    const presetModuleParams = moduleData.params;
+    const paramKeys = Object.keys(presetModuleParams).map(Number);
     paramKeys.forEach((paramKey: number) => {
-      const value = params[paramKey];
+      const moduleParam = module.params[paramKey as keyof typeof module.params];
+      if (!moduleParam || !(paramKey in presetModuleParams)) {
+        return;
+      }
+      const value = presetModuleParams[paramKey];
+      const moduleParamValueDef = moduleParam.values[value as keyof typeof moduleParam.values];
+      if (
+        !moduleParamValueDef ||
+        !('identifier' in moduleParamValueDef) ||
+        !('bytes' in moduleParamValueDef)
+      ) {
+        return;
+      }
+      const sysexIdentifier = moduleParamValueDef.identifier;
+      const bytes = Object.assign({}, moduleParamValueDef.bytes, moduleParam.bytes);
+      const byteArray = SonicakePocketMasterDevice.buildByteArray(bytes);
+
+      results.push({ byteArray, sysexIdentifier });
     });
 
     return results;

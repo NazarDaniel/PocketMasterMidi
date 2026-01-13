@@ -11,5 +11,9 @@ export interface PedalsPreset {
 
 interface NR {
   state: string;
-  params?: { 0: number };
+  params?: PresetParam;
+}
+
+export interface PresetParam {
+  [key: number]: number;
 }
