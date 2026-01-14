@@ -17,7 +17,6 @@ export class nr {
         20: 1,
         26: 0,
       },
-      // [12, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
     },
     {
       state: 'off',
@@ -46,6 +45,7 @@ export class nr {
         8: 1,
         9: 4,
         10: 8,
+        12: 1,
       },
       values: {
         // maps threshold values to sysex bytes sent

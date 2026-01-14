@@ -59,8 +59,8 @@ const loadPreampPreset = (presetName: string | number) => {
   device?.loadPreampPreset(presetName);
 };
 
-const loadPedalsPreset = (presetId: string | number) => {
-  device?.loadPedalsPreset(presetId);
+const loadPedalsPreset = async (presetId: string | number) => {
+  await device?.loadPedalsPreset(presetId);
 };
 
 const test = () => {
@@ -71,7 +71,9 @@ const test = () => {
   // let str = '8080f0000a00010000000a0101040900000000000000000000000000000000f7'; // nr off
   // let str = '8080f0010c00010000000a0101040900000000000000000001000000000000f7'; //nr on
   // let str = '8080F00D0200010000000E01010408000000000000000000000000000000000000000000000000F7'; // nr = 0
-  let str = '8080F0000C00010000000E01010408000000000000000000000000000000000000000008080401F7'; // nr = 17
+  // let str = '8080F0000C00010000000E01010408000000000000000000000000000000000000000008080401F7'; // nr = 17
+  let str = '8080f0000f00010000000a0101040900010000000000000001000000000000f7'; // fx1 on
+  // let str = '8080f0010900010000000a0101040900010000000000000000000000000000f7'; // fx 1 off
   const identifier = parseInt(str.substring(6, 8), 16);
   console.log(str);
   str = str.substring(8);
@@ -82,11 +84,8 @@ const test = () => {
     return;
   }
 
+  console.log(identifier);
   console.log(hexBytes);
-  device?.sendSysex(hexBytes, identifier);
-  // const test = [10, 0, 1, 0, 0, 0, 10, 1, 1, 4, 9];
-  // console.log(test);
-  // device?.sendSysex(test, 0);
 };
 
 const Midi = ref(WebMidi);

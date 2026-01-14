@@ -4,6 +4,7 @@ import preampPresets from './default-preamp-presets';
 import pedalsPresets from './default-pedals-presets';
 import type { bytesDefinition } from './models/bytes-definition';
 import type { PedalsPreset } from './models/pedals-preset';
+import { fx1 } from './fx1';
 
 export class SonicakePocketMasterDevice extends Device implements DeviceInterface {
   public preampPresets: object[];
@@ -16,6 +17,7 @@ export class SonicakePocketMasterDevice extends Device implements DeviceInterfac
   }
   modules: SonicakePocketMasterDeviceModules = {
     nr: new nr(),
+    fx1: new fx1(),
   };
 
   loadDefaults() {
@@ -27,30 +29,34 @@ export class SonicakePocketMasterDevice extends Device implements DeviceInterfac
     console.log('loadPreampPreset');
   }
 
-  loadPedalsPreset(id: string | number) {
+  async loadPedalsPreset(id: string | number) {
     const preset: PedalsPreset | undefined = this.pedalsPresets.find((p) => p.id === id);
     if (!preset) {
       return;
     }
     const moduleNames = Object.keys(this.modules);
-    moduleNames.forEach((moduleName) => {
+    // moduleNames.forEach((moduleName) => {
+    for (const moduleName of moduleNames) {
       const moduleData = preset[moduleName as keyof SonicakePocketMasterDeviceModules];
       if (!moduleData) {
-        return;
+        continue;
       }
 
       // process module state
       const stateSysex = this.getStateSysex(preset, moduleName);
       if (stateSysex && 'byteArray' in stateSysex && 'sysexIdentifier' in stateSysex) {
-        this.sendSysex(stateSysex.byteArray, stateSysex.sysexIdentifier);
+        await this.sendSysex(stateSysex.byteArray, stateSysex.sysexIdentifier);
       }
 
       // process module parameters
       const parameterSysexes = this.getParameterSysexes(preset, moduleName);
-      parameterSysexes?.forEach((sysexMessage) => {
-        this.sendSysex(sysexMessage.byteArray, sysexMessage.sysexIdentifier);
-      });
-    });
+      if (!parameterSysexes) {
+        continue;
+      }
+      for (const sysexMessage of parameterSysexes) {
+        await this.sendSysex(sysexMessage.byteArray, sysexMessage.sysexIdentifier);
+      }
+    }
   }
 
   getParameterSysexes(preset: PedalsPreset, moduleName: string) {
@@ -131,4 +137,5 @@ export class SonicakePocketMasterDevice extends Device implements DeviceInterfac
 
 interface SonicakePocketMasterDeviceModules {
   nr: nr;
+  fx1: fx1;
 }

@@ -8,7 +8,11 @@ export default [
       },
     },
     fx1: {
-      state: 'off',
+      state: 'on',
+      params: {
+        0: 10,
+        1: 20,
+      },
     },
     drive: {
       state: 'on',
@@ -43,6 +47,10 @@ export default [
     },
     fx1: {
       state: 'off',
+      params: {
+        0: 20,
+        1: 30,
+      },
     },
     drive: {
       state: 'on',

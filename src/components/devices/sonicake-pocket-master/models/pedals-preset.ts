@@ -1,7 +1,7 @@
 export interface PedalsPreset {
   id: number | string;
   nr?: NR;
-  fx1?: object;
+  fx1?: FX1;
   drive?: object;
   eq?: object;
   fx2?: object;
@@ -10,6 +10,11 @@ export interface PedalsPreset {
 }
 
 interface NR {
+  state: string;
+  params?: PresetParam;
+}
+
+interface FX1 {
   state: string;
   params?: PresetParam;
 }

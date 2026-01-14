@@ -4,7 +4,7 @@ export interface DeviceInterface {
   name: string;
   preampPresets: object;
   loadDefaults(): void;
-  loadPedalsPreset(id: string | number): void;
+  loadPedalsPreset(id: string | number): Promise<void>;
   loadPreampPreset(id: string | number): void;
 }
 
@@ -17,14 +17,15 @@ export abstract class Device {
     this.name = name;
   }
 
-  sendSysex(byteArray: number[], identifier?: number) {
-    if (!this.midiOutput) {
+  async sendSysex(byteArray: number[], identifier?: number): Promise<void> {
+    if (!this.midiOutput || byteArray.length === 0) {
       return;
     }
     if (!identifier) {
       identifier = 0;
     }
     this.midiOutput.sendSysex(identifier, byteArray);
+    return await new Promise((r) => setTimeout(r, 10));
   }
 
   setMidiInput(input: Input) {
